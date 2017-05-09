@@ -3,27 +3,39 @@ import { ErrorHandler, NgModule } from '@angular/core';
 import { IonicApp, IonicErrorHandler, IonicModule } from 'ionic-angular';
 import { SplashScreen } from '@ionic-native/splash-screen';
 import { StatusBar } from '@ionic-native/status-bar';
-
+import { HttpModule } from '@angular/http';
+// Pages
 import { MyApp } from './app.component';
 import { TodosPage } from '../pages/todos/todos';
-
+import { AddTaskModalPage } from '../pages/add-task-modal/add-task-modal';
+// Providers
+import { TodoService } from '../shared/todo-service';
+// Pipes
+import { PrioritizedTodosPipe } from '../pipes/prioritized-todos-pipe';
+import { DoneTodosPipe } from '../pipes/done-todos-pipe';
 @NgModule({
   declarations: [
     MyApp,
-    TodosPage
+    TodosPage,
+    AddTaskModalPage,
+    PrioritizedTodosPipe,
+    DoneTodosPipe
   ],
   imports: [
     BrowserModule,
+    HttpModule,
     IonicModule.forRoot(MyApp)
   ],
   bootstrap: [IonicApp],
   entryComponents: [
     MyApp,
-    TodosPage
+    TodosPage,
+    AddTaskModalPage
   ],
   providers: [
     StatusBar,
     SplashScreen,
+    TodoService,
     {provide: ErrorHandler, useClass: IonicErrorHandler}
   ]
 })
