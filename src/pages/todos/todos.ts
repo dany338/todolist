@@ -18,7 +18,6 @@ export class TodosPage {
   //public todos: TodoModel[];
   private toogleTodoTimeout = null;
 
-
   constructor(public navCtrl: NavController, public navParams: NavParams, public modalCtrl: ModalController, public todoService: TodoService, private platform: Platform) {
   }
 

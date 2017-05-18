@@ -43,7 +43,7 @@ export class TodoService {
   }
 
   addTodo(todo:TodoModel) {
-    this.todos.push(todo);
+    //this.todos.push(todo);
     this.todos = [
       ...this.todos,
       todo
