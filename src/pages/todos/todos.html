@@ -1,15 +1,21 @@
 <ion-header>
 
   <ion-navbar color="primary">
-    <ion-title>todos</ion-title>
+    <ion-title>To Do List</ion-title>
   </ion-navbar>
 
 </ion-header>
 <!-- [style.font-weight]="600"-->
 <!-- [ngStyle]="{'font-weight':600, 'text-decoration':'line-through'}" -->
 <ion-content padding>
-  <h3>My List</h3>
+  <h3>{{list.name}}</h3>
+
   <ion-list>
+
+    <ion-item class="no-todos" *ngIf="!todoService.todos || todoService.todos.length == 0">
+      Add some tasks to your list
+    </ion-item>
+
     <ion-item-sliding *ngFor="let todo of todoService.todos | prioritizedTodosPipe ">
 
       <ion-item [ngStyle]="setTodoStyles(todo)">

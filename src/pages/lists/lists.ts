@@ -1,7 +1,9 @@
 import { Component } from '@angular/core';
-import { IonicPage, NavController, NavParams, AlertController } from 'ionic-angular';
+import { IonicPage, NavController, NavParams, AlertController, LoadingController, ViewController } from 'ionic-angular';
 import { TodosPage } from '../todos/todos';
 import { ListsService } from '../../shared/lists-service';
+import { ListModel } from '../../shared/list-model';
+
 @IonicPage()
 @Component({
   selector: 'page-lists',
@@ -9,23 +11,32 @@ import { ListsService } from '../../shared/lists-service';
 })
 export class ListsPage {
 
-  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public listsService:ListsService) {
+  constructor(public navCtrl: NavController, public navParams: NavParams, public alertCtrl: AlertController, public listsService:ListsService, private loadingCtrl: LoadingController, public viewCtrl: ViewController) {
   }
 
   ionViewDidLoad() {
     console.log('ionViewDidLoad Lists');
   }
 
-  goToList() {
-    this.navCtrl.push(TodosPage);
+  goToList(list:ListModel) {
+    this.navCtrl.push(TodosPage, {list});
   }
 
   addNewList(name:string) {
-    this.listsService.addList(name);
+    let loader = this.loadingCtrl.create({
+      dismissOnPageChange: true
+    });
+    loader.present();
+    this.listsService.addList(name)
+    .subscribe(list => {
+        this.goToList(list);
+    },
+    error => { loader.dismiss();});
   }
 
   showAddList() {
     let addListAlert = this.alertCtrl.create({
+      enableBackdropDismiss: true,
       title: 'New List',
       message: 'Give a name to the new list',
       inputs: [
@@ -41,7 +52,11 @@ export class ListsPage {
         },
         {
           text: 'Add',
-          handler: data => {this.addNewList(data.name);}
+          handler: data => {
+            //let navTransition = addListAlert.dismiss();
+            //navTransition.then(()=>{});
+            this.addNewList(data.name);
+          }
         }
       ]
     });

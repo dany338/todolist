@@ -1,31 +1,83 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
+import { Storage } from '@ionic/storage';
 import 'rxjs/add/operator/map';
+import 'rxjs/add/operator/share';
+import { Observable } from 'rxjs/Rx';
 import { ListModel } from './list-model';
+import { AppSettings } from './app-settings';
 @Injectable()
 export class ListsService {
 
   public lists:ListModel[] = [];
 
-  constructor(public http: Http) {
+  constructor(public http: Http, public storage: Storage) {
     this.getLists();
   }
 
   private getLists() {
-    this.lists = [
-      new ListModel("My List #1", 1),
-      new ListModel("My List #2", 2),
-      new ListModel("My List #3", 3),
-      new ListModel("My List #4", 4),
-      new ListModel("My List #5", 5),
-      new ListModel("My List #6", 6),
-      new ListModel("My List #7", 7)
-    ];
+    this.getFromLocal()
+    .then(()=> { this.getFromServer() },
+          ()=> { this.getFromServer() });
   }
 
   public addList(name:string) {
-    let list = new ListModel(name, this.lists.length);
-    this.lists = [...this.lists, list];
+    let observable = this.postNewLisToServer(name);
+
+    observable.subscribe(
+      (list: ListModel)=>{// arow function
+        this.lists = [...this.lists, list];
+        this.saveLocally();
+      },
+      error => console.log("Error tryping to post a new list to the server")
+    );
+    return observable;
+  }
+
+  private getFromLocal() {
+    return this.storage.ready().then(() => {
+      return this.storage.get('lists').then((data)=> {
+        let storageLists:ListModel[] = [];
+        if(data) {
+          for(let list of data){
+            storageLists.push(new ListModel(list.name, list.id));
+          }
+        }
+        this.lists = storageLists;
+      });
+    });
+  }
+
+  private getFromServer() {
+    this.http.get(`${AppSettings.API_ENDPOINT}/lists`) //temporal string
+    .map(response => { return response.json() })
+    .map((lists:Object[]) => {
+      return lists.map(item => ListModel.fromJson(item));
+    })
+    .subscribe(
+      (result:ListModel[]) => {
+        this.lists = result;
+        this.saveLocally();
+      },
+      error => {
+        console.log("Error loading lists from server", error);
+      }
+    );
+  }
+
+  private postNewLisToServer(name): Observable<ListModel>{
+    // como el nombre de la propiedad y el valor es cero en ECS6 se puede juntar diractamente
+    let observable = this.http.post(`${AppSettings.API_ENDPOINT}/lists`, {name})
+                     .share()
+                     .map(response=>  response.json() )
+                     .map(list=> ListModel.fromJson(list));//row function
+
+    observable.subscribe(()=>{}, ()=>{});
+    return observable;
+  }
+
+  public saveLocally() {
+    this.storage.set('lists',JSON.stringify(this.lists));
   }
 
 }

@@ -12,6 +12,7 @@ import { AddTaskModalPage } from '../pages/add-task-modal/add-task-modal';
 // Providers
 import { TodoService } from '../shared/todo-service';
 import { ListsService } from '../shared/lists-service';
+import { IonicStorageModule } from '@ionic/storage';
 // Pipes
 import { PrioritizedTodosPipe } from '../pipes/prioritized-todos-pipe';
 import { DoneTodosPipe } from '../pipes/done-todos-pipe';
@@ -27,7 +28,8 @@ import { DoneTodosPipe } from '../pipes/done-todos-pipe';
   imports: [
     BrowserModule,
     HttpModule,
-    IonicModule.forRoot(MyApp)
+    IonicModule.forRoot(MyApp),
+    IonicStorageModule.forRoot()
   ],
   bootstrap: [IonicApp],
   entryComponents: [

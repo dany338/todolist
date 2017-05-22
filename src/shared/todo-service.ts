@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Http } from '@angular/http';
 import { Platform } from 'ionic-angular';
+import { Storage } from '@ionic/storage';
 import 'rxjs/add/operator/map';
 
 import { TodoModel } from './todo-model';
@@ -8,27 +9,37 @@ import { TodoModel } from './todo-model';
 @Injectable()
 export class TodoService {
 
-  private todos: TodoModel[];
+  private todos: TodoModel[] = [];
 
-  constructor(private http: Http, private platform: Platform) {
-    this.getTodos();
+  constructor(private http: Http, private platform: Platform, public storage: Storage) {
   }
 
-  getTodos() {
-    this.todos = [
-      new TodoModel('This First Task 1'),
-      new TodoModel('This First Task 2', false, true),
-      new TodoModel('This First Task 3'),
-      new TodoModel('This First Task 4', true),
-      new TodoModel('This First Task 5'),
-      new TodoModel('This First Task 6'),
-      new TodoModel('This First Task 7'),
-      new TodoModel('This First Task 8'),
-      new TodoModel('This First Task 9'),
-      new TodoModel('This First Task 10'),
-      new TodoModel('This First Task 11'),
-    ];
+  public loadFromList(id:number) {
+    this.getFromLocal(id);
   }
+
+  public getFromLocal(id:number) {
+    return this.storage.ready().then(() => {
+      return this.storage.get(`list/${id}`).then((data)=> { // Acento al inicio y al principio abierto literal string
+        if(!data) {
+          this.todos = [];
+          return;
+        }
+        let storageTodos:TodoModel[] = [];
+        for(let todo of data){
+          storageTodos.push(new TodoModel(todo.description, todo.isImportant, todo.isDone));
+        }
+        this.todos = storageTodos;
+      });
+    });
+  }
+
+  public saveLocally(id:number) {
+    this.storage.ready().then(()=>{
+      this.storage.set(`list/${id}`,this.todos);
+    });
+  }
+
   // Convertir mis metodos en inmutables
   toogleTodo(todo:TodoModel) {
     let isDone = !todo.isDone;
